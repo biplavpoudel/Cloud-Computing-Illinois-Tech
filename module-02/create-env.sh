@@ -25,14 +25,14 @@ then
 else
 echo "Beginning to launch $5 EC2 instances..."
 # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/run-instances.html
-aws ec2 run-instances \ 
-    --image-id $1 \
-    --instance-type $2 \
-    --key-name $3 \
-    --security-group-ids $4 \
-    --user-data file://$6 \
-    --tag-specifications "ResourceType=instance,Tags=[{Key=module,Value=$7}]" \
-    --count $5 
+aws ec2 run-instances \
+  --image-id $1 \
+  --instance-type $2 \
+  --key-name $3 \
+  --security-group-ids $4 \
+  --user-data file://$6 \
+  --tag-specifications "ResourceType=instance,Tags=[{Key=module,Value=$7}]" \
+  --count $5 
 
 
 #https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/wait/instance-running.html
