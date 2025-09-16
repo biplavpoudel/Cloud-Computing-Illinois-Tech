@@ -2,7 +2,7 @@
 ##############################################################################
 # Module-02 Assessement
 # This assignment requires you to launch 3 EC2 instances from the commandline
-# Of type t2.micro using the keypair and securitygroup ID you created 
+# Of type t3.micro (correction: t2.micro ineligible for Free Tier) using the keypair and securitygroup ID you created 
 # 
 # You will need to define these variables in a text file named: arguments.txt
 # Located in your Vagrant Box home directory
