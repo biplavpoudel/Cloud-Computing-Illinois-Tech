@@ -48,7 +48,7 @@ echo $INSTANCEIDS
 # running state
 if [ "$INSTANCEIDS" != "" ]
   then
-    aws ec2 wait instance-running 
+    aws ec2 wait instance-running --instance-ids $INSTANCEIDS 
     echo "Finished launching instances..."
   else
     echo 'There are no running or pending values in $INSTANCEIDS to wait for...'
