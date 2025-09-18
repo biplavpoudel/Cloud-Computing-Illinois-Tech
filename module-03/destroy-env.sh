@@ -9,7 +9,7 @@ echo "Beginning destroy script for module-03 assessment..."
 
 # Collect Instance IDs
 # https://stackoverflow.com/questions/31744316/aws-cli-filter-or-logic
-INSTANCEIDS=$(aws ec2 describe-instances --output=text --query 'Reservations[*].Instances[*].InstanceId' --filter "Name=instance-state-name,Values=running,pending")
+INSTANCEIDS=$(aws ec2 describe-instances --output=text --query 'Reservations[*].Instances[*].InstanceId' --filters "Name=instance-state-name,Values=running,pending")
 echo "List of INSTANCEIDS to deregister..."
 if [ "$INSTANCEIDS" == "" ];
   then
@@ -20,21 +20,21 @@ fi
 
 echo "Finding TARGETARN..."
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/describe-target-groups.html
-TARGETARN=$(aws elbv2 describe-target-groups --names $8)
+TARGETARN=$(aws elbv2 describe-target-groups --names $8 --query 'TargetGroups[*].TargetGroupArn' --output=text)
 echo $TARGETARN
 
 if [ "$INSTANCEIDS" != "" ]
   then
-    echo '$INSTANCEIDS to be deregistered with the target group...'
+    echo "$INSTANCEIDS to be deregistered with the target group..."
     # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/register-targets.html
-    # Assignes the value of $EC2IDS and places each element (seperated by a space) into an array element
+    # Assigns the value of $EC2IDS and places each element (separated by a space) into an array element
     INSTANCEIDSARRAY=($INSTANCEIDS)
     for INSTANCEID in ${INSTANCEIDSARRAY[@]};
       do
       echo "Deregistering target $INSTANCEID..."
       aws elbv2 deregister-targets --target-group-arn $TARGETARN --targets Id=$INSTANCEID
       echo "Waiting for target $INSTANCEID to be deregistered..."
-      aws elbv2 wait target-deregistered --target-group-arn $TARGETARN
+      aws elbv2 wait target-deregistered --target-group-arn $TARGETARN --targets Id=$INSTANCEID
       done
   else
     echo 'There are no running or pending values in $INSTANCEIDS to wait for...'
@@ -54,7 +54,7 @@ fi
 
 echo "Looking up ELB ARN..."
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/describe-load-balancers.html
-ELBARN=$(aws elbv2 describe-load-balancer --names $9)
+ELBARN=$(aws elbv2 describe-load-balancers --names $9 --query 'LoadBalancers[*].LoadBalancerArn' --output=text)
 
 # Collect ListenerARN
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/describe-listeners.html
@@ -63,7 +63,7 @@ ELBARN=$(aws elbv2 describe-load-balancer --names $9)
     for ELB in ${ELBARNSARRAY[@]};
       do
         echo "Deleting Listener..."
-        LISTENERARN=$(aws elbv2 describe-listeners --load-balancer-arn $ELB --query='Listeners[*].ListenerArn')
+        LISTENERARN=$(aws elbv2 describe-listeners --load-balancer-arn $ELB --query='Listeners[*].ListenerArn' --output=text)
         aws elbv2 delete-listener --listener-arn $LISTENERARN
         echo "Listener deleted..."
       done
@@ -94,5 +94,5 @@ else
 
   echo "Waiting for ELB to be deleted..."
   # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/wait/load-balancers-deleted.html#examples
-  aws elbv2 wait load-balancers-deleted --load-balancer-arns $ELBARN --names $9
+  aws elbv2 wait load-balancers-deleted --load-balancer-arns $ELBARN
 fi

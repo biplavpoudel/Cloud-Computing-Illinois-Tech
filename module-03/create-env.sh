@@ -1,4 +1,4 @@
-i#!/bin/bash
+#!/bin/bash
 ##############################################################################
 # Module-03
 # This assignment requires you to launch 3 EC2 instances from the commandline,
@@ -36,17 +36,17 @@ echo $SUBNET2B
 
 echo 'Creating the TARGET GROUP and storing the ARN in $TARGETARN...'
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/create-target-group.html
-TARGETARN=$(aws elbv2 create-target-group --name $8 --protocol HTTP --port 80 --target-type instance --vpc-id $VPCID)
+TARGETARN=$(aws elbv2 create-target-group --name $8 --protocol HTTP --port 80 --target-type instance --vpc-id $VPCID --query 'TargetGroups[*].TargetGroupArn' --output text)
 
 echo "Creating ELBv2 Elastic Load Balancer..."
 #https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/create-load-balancer.html
-ELBARN=$(aws elbv2 create-load-balancer --name $9 --subnets $SUBNET2A $SUBNET2B --security-groups $4 --scheme internet-facing)
+ELBARN=$(aws elbv2 create-load-balancer --name $9 --subnets $SUBNET2A $SUBNET2B --security-groups $4 --scheme internet-facing --query 'LoadBalancers[*].LoadBalancerArn' --output text)
 echo $ELBARN
 
 # AWS elbv2 wait for load-balancer available
 # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/elbv2/wait/load-balancer-available.html
 echo "Waiting for load balancer to be available..."
-aws elbv2 wait load-balancer-available --load-balancer-arns $ELBARN --names $9
+aws elbv2 wait load-balancer-available --load-balancer-arns $ELBARN
 echo "Load balancer available..."
 # create AWS elbv2 listener for HTTP on port 80
 #https://awscli.amazonaws.com/v2/documentation/api/latest/reference/elbv2/create-listener.html
@@ -89,7 +89,7 @@ fi
 
 # Retreive ELBv2 URL via aws elbv2 describe-load-balancers --query and print it to the screen
 #https://awscli.amazonaws.com/v2/documentation/api/latest/reference/elbv2/describe-load-balancers.html
-URL=$(aws elbv2 describe-load-balancers --load-balancer-arns $ELBARN)
+URL=$(aws elbv2 describe-load-balancers --load-balancer-arns $ELBARN --query 'LoadBalancers[*].DNSName' --output=text)
 echo $URL
 
 # end of outer fi - based on arguments.txt content
