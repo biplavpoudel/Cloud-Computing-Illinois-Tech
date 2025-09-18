@@ -20,7 +20,7 @@ fi
 
 echo "Finding TARGETARN..."
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/describe-target-groups.html
-TARGETARN=
+TARGETARN=$(aws elbv2 describe-target-groups --names $8)
 echo $TARGETARN
 
 if [ "$INSTANCEIDS" != "" ]
@@ -32,9 +32,9 @@ if [ "$INSTANCEIDS" != "" ]
     for INSTANCEID in ${INSTANCEIDSARRAY[@]};
       do
       echo "Deregistering target $INSTANCEID..."
-      aws elbv2 deregister-targets 
+      aws elbv2 deregister-targets --target-group-arn $TARGETARN --targets Id=$INSTANCEID
       echo "Waiting for target $INSTANCEID to be deregistered..."
-      aws elbv2 wait target-deregistered
+      aws elbv2 wait target-deregistered --target-group-arn $TARGETARN
       done
   else
     echo 'There are no running or pending values in $INSTANCEIDS to wait for...'
@@ -44,9 +44,9 @@ fi
 echo "Now terminating the detached INSTANCEIDS..."
 if [ "$INSTANCEIDS" != "" ]
   then
-    aws ec2 terminate-instances
+    aws ec2 terminate-instances --instance-ids $INSTANCEIDS
     echo "Waiting for all instances report state as TERMINATED..."
-    aws ec2 wait instance-terminated
+    aws ec2 wait instance-terminated --instance-ids $INSTANCEIDS
     echo "Finished destroying instances..."
   else
     echo 'There are no running values in $INSTANCEIDS to be terminated...'
@@ -54,8 +54,7 @@ fi
 
 echo "Looking up ELB ARN..."
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/describe-load-balancers.html
-ELBARN=
-echo $ELBARN
+ELBARN=$(aws elbv2 describe-load-balancer --names $9)
 
 # Collect ListenerARN
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/describe-listeners.html
@@ -90,10 +89,10 @@ if [ "$ELBARN" = "" ];
 else
   echo "Issuing Command to delete Load Balancer.."
   # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/delete-load-balancer.html
-  aws elbv2 delete-load-balancer 
+  aws elbv2 delete-load-balancer --load-balancer-arn $ELBARN
   echo "Load Balancer delete command has been issued..."
 
   echo "Waiting for ELB to be deleted..."
   # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/wait/load-balancers-deleted.html#examples
-  aws elbv2 wait load-balancers-deleted
+  aws elbv2 wait load-balancers-deleted --load-balancer-arns $ELBARN --names $9
 fi
