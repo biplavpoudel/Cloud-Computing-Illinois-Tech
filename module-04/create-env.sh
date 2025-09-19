@@ -34,7 +34,7 @@ then
   exit 1 
 elif ! [[ -e $ltconfigfile ]]
   then
-   echo 'The launch template configuration JSON file does not exist - make sure you run/ran the command: bash ./create-lt-json.sh $(< ~/arguments.txt) command before running the create-env.sh'
+   echo "Config JSON file for launch template $ltconfigfile not found! Run create-lt-json.sh $(< ~/arguments.txt) first."
    echo "Now exiting the program..."
    exit 1
 # else run the creation logic
@@ -56,7 +56,7 @@ echo $SUBNET2B
 # Create AWS EC2 Launch Template
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.33/reference/ec2/create-launch-template.html
 echo "Creating the AutoScalingGroup Launch Template..."
-aws ec2 create-launch-template --launch-template-name $12 --launch-template-data file://config.json --region $17
+aws ec2 create-launch-template --launch-template-name $12 --launch-template-data file://ltconfigfile --region $17
 echo "Launch Template created..."
 
 # Retreive the Launch Template ID using a --query

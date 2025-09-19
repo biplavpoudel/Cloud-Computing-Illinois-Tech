@@ -14,8 +14,8 @@ else
 echo 'Creating lauch template data file ./config.json...'
 
 echo "Finding and storing the subnet IDs for defined in arguments.txt Availability Zone 1 and 2..."
-SUBNET2A=$(aws ec2 describe-subnets --output=text --query='Subnets[*].SubnetId' --filter "Name=availability-zone,Values=${10}")
-SUBNET2B=$(aws ec2 describe-subnets --output=text --query='Subnets[*].SubnetId' --filter "Name=availability-zone,Values=${11}")
+SUBNET2A=$(aws ec2 describe-subnets --output=text --query='Subnets[*].SubnetId' --filters "Name=availability-zone,Values=${10}")
+SUBNET2B=$(aws ec2 describe-subnets --output=text --query='Subnets[*].SubnetId' --filters "Name=availability-zone,Values=${11}")
 echo $SUBNET2A
 echo $SUBNET2B
 
@@ -55,6 +55,10 @@ JSON="{
         \"AvailabilityZone\": \"${10}\"
     },\"TagSpecifications\":[{\"ResourceType\":\"instance\",\"Tags\":[{\"Key\":\"module\",\"Value\": \"${7}\" }]}]
 }"
+
+# Checking if AMI ID is correct
+echo "AMI ID passed: '${1}'"
+
 
 # Redirecting the content of our JSON to a file
 echo $JSON > ./config.json
