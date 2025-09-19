@@ -92,16 +92,17 @@ echo 'Creating Auto Scaling Group...'
 aws autoscaling create-auto-scaling-group \
   --auto-scaling-group-name ${13} \
   --launch-template LaunchTemplateId=$LAUNCHTEMPLATEID \
+  ----target-group-arns $TARGETARN \
   --min-size ${14} \
   --max-size ${15} \
   --desired-capacity ${16} \
   --vpc-zone-identifier "${SUBNET2A},${SUBNET2B}"
 
-echo 'Waiting for Auto Scaling Group to spin up EC2 instances and attach them to the TargetARN...'
-# Create waiter for registering targets
-# https://docs.aws.amazon.com/cli/latest/reference/elbv2/wait/target-in-service.html
-aws elbv2 wait target-in-service --target-group-arn $TARGETARN
-echo "Targets attached to Auto Scaling Group..."
+  echo 'Waiting for Auto Scaling Group to spin up EC2 instances and attach them to the TargetARN...'
+  # Create waiter for registering targets
+  # https://docs.aws.amazon.com/cli/latest/reference/elbv2/wait/target-in-service.html
+  aws elbv2 wait target-in-service --target-group-arn $TARGETARN
+  echo "Targets attached to Auto Scaling Group..."
 
 # Collect Instance IDs
 # https://stackoverflow.com/questions/31744316/aws-cli-filter-or-logic
