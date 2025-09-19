@@ -9,7 +9,7 @@ ltconfigfile="./config.json"
 echo "Beginning destroy script for module-04 assessment..."
 
 echo "Finding Launch template configuration file: $ltconfigfile..."
-if [ -a $ltconfigfile ]
+if [ -e $ltconfigfile ]
 then
   echo "Deleting Launch template configuration file: $ltconfigfile..."
   rm $ltconfigfile
@@ -20,7 +20,7 @@ else
 fi
 
 # Collect Instance IDs
-INSTANCEIDS=$(aws ec2 describe-instances --output=text --query 'Reservations[*].Instances[*].InstanceId' --filters "Name=instance-state-name,Values=running")
+INSTANCEIDS=$(aws ec2 describe-instances --output=text --query 'Reservations[*].Instances[*].InstanceId' --filters "Name=instance-state-name,Values=running,pending")
 
 echo 'Finding autoscaling group names...'
 ASGNAMES=$(aws autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[*].AutoScalingGroupName' --output=text)
@@ -68,7 +68,7 @@ fi
 
 if [ "$INSTANCEIDS" != "" ]
   then
-    echo "\$INSTANCEIDS to be deregistered with the target group..."
+    echo "$INSTANCEIDS to be deregistered with the target group..."
     # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/register-targets.html
     # Assignes the value of $EC2IDS and places each element (seperated by a space) into an array element
     INSTANCEIDSARRAY=($INSTANCEIDS)
@@ -95,7 +95,7 @@ echo $ELBARN
     for ELB in ${ELBARNSARRAY[@]};
       do
         echo "Deleting Listener..."
-        LISTENERARN=$(aws elbv2 describe-listeners --load-balancer-arn $ELB --query='Listeners[*].ListenerArn')
+        LISTENERARN=$(aws elbv2 describe-listeners --load-balancer-arn $ELB --query='Listeners[*].ListenerArn' --output text)
         aws elbv2 delete-listener --listener-arn $LISTENERARN
         echo "Listener deleted..."
       done
@@ -148,14 +148,14 @@ else
 # End of if for checking on ASGs
 fi
 
-echo 'Finding lauch-templates...'
+echo 'Finding launch-templates...'
 LAUNCHTEMPLATEIDS=$(aws ec2 describe-launch-templates --query 'LaunchTemplates[].LaunchTemplateName' --output text)
 
 if [ "$LAUNCHTEMPLATEIDS" != "" ]
   then
     echo "Found launch-tempate: $LAUNCHTEMPLATEIDS..."
     for LAUNCHTEMPLATEID in $LAUNCHTEMPLATEIDS; do
-      echo "Deleting launch-template: $LAUNCHTEMPID"
+      echo "Deleting launch-template: $LAUNCHTEMPLATEID"
       aws ec2 delete-launch-template --launch-template-name "$LAUNCHTEMPLATEID"
     done
 else
