@@ -56,11 +56,11 @@ echo $SUBNET2B
 # Create AWS EC2 Launch Template
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.33/reference/ec2/create-launch-template.html
 echo "Creating the AutoScalingGroup Launch Template..."
-aws ec2 create-launch-template --launch-template-name $12 --launch-template-data file://config.json
+aws ec2 create-launch-template --launch-template-name ${12} --launch-template-data file://config.json
 echo "Launch Template created..."
 
 # Retreive the Launch Template ID using a --query
-LAUNCHTEMPLATEID=$(aws ec2 describe-launch-templates --query 'LaunchTemplates[*].LaunchTemplateId' --filters Name=launch-template-name,Values=$12 --output text)
+LAUNCHTEMPLATEID=$(aws ec2 describe-launch-templates --query 'LaunchTemplates[*].LaunchTemplateId' --filters Name=launch-template-name,Values=${12} --output text)
 
 echo 'Creating the TARGET GROUP and storing the ARN in $TARGETARN'
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/create-target-group.html
@@ -90,11 +90,11 @@ echo 'Creating Auto Scaling Group...'
 # Create autoscaling group
 # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/autoscaling/create-auto-scaling-group.html
 aws autoscaling create-auto-scaling-group \
-  --auto-scaling-group-name $13 \
+  --auto-scaling-group-name ${13} \
   --launch-template LaunchTemplateId=$LAUNCHTEMPLATEID \
-  --min-size $14 \
-  --max-size $15 \
-  --desired-capacity $16 \
+  --min-size ${14} \
+  --max-size ${15} \
+  --desired-capacity ${16} \
   --vpc-zone-identifier "${SUBNET2A},${SUBNET2B}"
 
 echo 'Waiting for Auto Scaling Group to spin up EC2 instances and attach them to the TargetARN...'

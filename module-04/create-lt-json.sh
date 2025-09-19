@@ -2,7 +2,7 @@
 
 ltconfigfile="./config.json"
 
-if [ -a $ltconfigfile ]
+if [ -e $ltconfigfile ]
 then
   echo "You have already created the launch-tempalte-data file ./config.json..."
   exit 1
@@ -14,8 +14,8 @@ else
 echo 'Creating lauch template data file ./config.json...'
 
 echo "Finding and storing the subnet IDs for defined in arguments.txt Availability Zone 1 and 2..."
-SUBNET2A=$(aws ec2 describe-subnets --output=text --query='Subnets[*].SubnetId' --filters "Name=availability-zone,Values=${10}")
-SUBNET2B=$(aws ec2 describe-subnets --output=text --query='Subnets[*].SubnetId' --filters "Name=availability-zone,Values=${11}")
+SUBNET2A=$(aws ec2 describe-subnets --output=text --query='Subnets[*].SubnetId' --filters Name=availability-zone,Values=${10})
+SUBNET2B=$(aws ec2 describe-subnets --output=text --query='Subnets[*].SubnetId' --filters Name=availability-zone,Values=${11})
 echo $SUBNET2A
 echo $SUBNET2B
 
@@ -35,33 +35,59 @@ BASECONVERT=$(base64 -w 0 < ${6})
 # Then write it out to a file -- and then attach it to the --launch-template-data option
 # Otherwise we are running into issues with the dynamic bash variables
 
-JSON="{
-    \"NetworkInterfaces\": [
-        {
-            \"DeviceIndex\": 0,
-            \"AssociatePublicIpAddress\": true,
-            \"Groups\": [
-                \"${4}\"
-            ],
-            \"SubnetId\": \"$SUBNET2A\",
-            \"DeleteOnTermination\": true
-        }
-    ],
-    \"ImageId\": \"${1}\",
-    \"InstanceType\": \"${2}\",
-    \"KeyName\": \"${3}\",
-    \"UserData\": \"$BASECONVERT\",
-    \"Placement\": {
-        \"AvailabilityZone\": \"${10}\"
-    },\"TagSpecifications\":[{\"ResourceType\":\"instance\",\"Tags\":[{\"Key\":\"module\",\"Value\": \"${7}\" }]}]
-}"
-
-# Checking if AMI ID is correct
-echo "AMI ID passed: '${1}'"
+# JSON="{
+#     \"NetworkInterfaces\": [
+#         {
+#             \"DeviceIndex\": 0,
+#             \"AssociatePublicIpAddress\": true,
+#             \"Groups\": [
+#                 \"${4}\"
+#             ],
+#             \"SubnetId\": \"$SUBNET2A\",
+#             \"DeleteOnTermination\": true
+#         }
+#     ],
+#     \"ImageId\": \"${1}\",
+#     \"InstanceType\": \"${2}\",
+#     \"KeyName\": \"${3}\",
+#     \"UserData\": \"$BASECONVERT\",
+#     \"Placement\": {
+#         \"AvailabilityZone\": \"${10}\"
+#     },\"TagSpecifications\":[{\"ResourceType\":\"instance\",\"Tags\":[{\"Key\":\"module\",\"Value\": \"${7}\" }]}]
+# }"
 
 
 # Redirecting the content of our JSON to a file
-echo $JSON > ./config.json
+cat > config.json <<EOF
+{
+  "NetworkInterfaces": [
+    {
+      "DeviceIndex": 0,
+      "AssociatePublicIpAddress": true,
+      "Groups": ["${4}"],
+      "SubnetId": "$SUBNET2A",
+      "DeleteOnTermination": true
+    }
+  ],
+  "ImageId": "${1}",
+  "InstanceType": "${2}",
+  "KeyName": "${3}",
+  "UserData": "$BASECONVERT",
+  "Placement": { "AvailabilityZone": "${10}" },
+  "TagSpecifications": [
+    {
+      "ResourceType": "instance",
+      "Tags": [{"Key":"module","Value":"${7}"}]
+    }
+  ]
+}
+EOF
+
+# Validate JSON
+jq . config.json >/dev/null || { echo "config.json is invalid!"; exit 1; }
+
+# Checking if AMI ID is correct
+echo "AMI ID passed: '${1}'"
 
 # End of main IF
 fi
