@@ -20,7 +20,7 @@ fi
 
 echo "Finding TARGETARN..."
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/describe-target-groups.html
-TARGETARN=$(aws elbv2 describe-target-groups --names $8 --query 'TargetGroups[*].TargetGroupArn' --output=text)
+TARGETARN=$(aws elbv2 describe-target-groups --query 'TargetGroups[*].TargetGroupArn' --output=text)
 echo $TARGETARN
 
 if [ "$INSTANCEIDS" != "" ]
@@ -54,7 +54,7 @@ fi
 
 echo "Looking up ELB ARN..."
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/describe-load-balancers.html
-ELBARN=$(aws elbv2 describe-load-balancers --names $9 --query 'LoadBalancers[*].LoadBalancerArn' --output=text)
+ELBARN=$(aws elbv2 describe-load-balancers --query 'LoadBalancers[*].LoadBalancerArn' --output=text)
 
 # Collect ListenerARN
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/describe-listeners.html
