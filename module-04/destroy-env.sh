@@ -19,9 +19,6 @@ else
 # end of config.json delete
 fi
 
-# Collect Instance IDs
-INSTANCEIDS=$(aws ec2 describe-instances --output=text --query 'Reservations[*].Instances[*].InstanceId' --filters "Name=instance-state-name,Values=running,pending")
-
 echo 'Finding autoscaling group names...'
 ASGNAMES=$(aws autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[*].AutoScalingGroupName' --output=text)
 if [ "$ASGNAMES" != "" ]
@@ -37,12 +34,15 @@ if [ "$ASGNAMES" != "" ]
       aws autoscaling update-auto-scaling-group \
       --auto-scaling-group-name $ASGNAME \
       --desired-capacity 0
+      
+    # Collect Instance IDs
+    INSTANCEIDS=$(aws ec2 describe-instances --output=text --query 'Reservations[*].Instances[*].InstanceId' --filters Name=instance-state-name,Values=running,pending)
   
      if [ "$INSTANCEIDS" != "" ]
        then
          # Trying a trick here to use the ec2 terminate-instance waiter to let the autoscaling group wind down the instances
          echo "Waiting for all instances to be terminated..."
-         aws ec2 wait instance-terminated --instance-ids  $INSTANCEIDS
+         aws ec2 wait instance-terminated --instance-ids $INSTANCEIDS
          echo "All instances terminated..."
     else
       echo "No instances to wait for termination..."
@@ -142,7 +142,7 @@ else
     for ASGNAME in ${ASGNAMESARRAY[@]};
       do
       echo "Deleting $ASGNAME..."
-      aws autoscaling delete-auto-scaling-group --auto-scaling-group-name $ASGNAME
+      aws autoscaling delete-auto-scaling-group --auto-scaling-group-name $ASGNAME --force-delete
       echo "Deleted $ASGNAME..."
       done
 # End of if for checking on ASGs
