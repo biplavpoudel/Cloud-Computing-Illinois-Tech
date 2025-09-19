@@ -28,19 +28,18 @@
 
 ltconfigfile="./config.json"
 
-if [ $# = 0 ]
-then
-  echo 'You do not have enough variable in your arugments.txt, perhaps you forgot to run: bash ./create-env.sh $(< ~/arguments.txt)'
-  exit 1 
-elif ! [[ -a $ltconfigfile ]]
+# No need for passing ~/arguments.txt like in previous modules
+# if [ $# = 0 ]
+# then
+#   echo 'You do not have enough variable in your arugments.txt, perhaps you forgot to run: bash ./create-env.sh $(< ~/arguments.txt)'
+#   exit 1 
+if ! [[ -e $ltconfigfile ]]
   then
-   echo 'The launch template configuration JSON file does not exist - make sure you run/ran the command: bash ./create-lt-json.sh $(< ~/arguments.txt) command before running the create-env.sh $(< ~/arguments.txt)'
+   echo 'The launch template configuration JSON file does not exist - make sure you run/ran the command: bash ./create-lt-json.sh $(< ~/arguments.txt) command before running the create-env.sh'
    echo "Now exiting the program..."
    exit 1
 # else run the creation logic
 else
-if [ -a $ltconfigfile ]
-    then
     echo "Launch template data file: $ltconfigfile exists..." 
 fi
 echo "Finding and storing default VPCID value..."
