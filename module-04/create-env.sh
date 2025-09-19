@@ -92,7 +92,7 @@ echo 'Creating Auto Scaling Group...'
 aws autoscaling create-auto-scaling-group \
   --auto-scaling-group-name ${13} \
   --launch-template LaunchTemplateId=$LAUNCHTEMPLATEID \
-  ----target-group-arns $TARGETARN \
+  --target-group-arns $TARGETARN \
   --min-size ${14} \
   --max-size ${15} \
   --desired-capacity ${16} \
