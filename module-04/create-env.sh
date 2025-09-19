@@ -40,7 +40,6 @@ elif ! [[ -e $ltconfigfile ]]
 # else run the creation logic
 else
     echo "Launch template data file: $ltconfigfile exists..." 
-fi
 
 echo "Finding and storing default VPCID value..."
 # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/describe-vpcs.html
