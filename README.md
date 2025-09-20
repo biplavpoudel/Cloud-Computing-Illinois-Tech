@@ -1,6 +1,9 @@
 # Cloud-Computing-Illinois-Tech Assignments
 Assignment Repository for Coursera's Cloud Computing by Illinois Tech.
 
+## Architecture
+![aws assignment architecture](architecture.png)
+
 ## Requirements
 We need to install some packages into Vagrant box:
 ```bash
