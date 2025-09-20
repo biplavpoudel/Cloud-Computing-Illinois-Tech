@@ -44,18 +44,18 @@ elif ! [[ -e $ltconfigfile ]]
    exit 1
 # else run the creation logic
 else
-if [ -a $ltconfigfile ]
+if [ -e $ltconfigfile ]
     then
     echo "Launch template data file: $ltconfigfile exists..." 
 fi
 echo "Finding and storing default VPCID value..."
 # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/describe-vpcs.html
-VPCID=$(aws ec2 describe-vpcs --filters "Name=is-default,Values=true" --query "Vpcs[*].VpcId" --output=text)
+VPCID=$(aws ec2 describe-vpcs --filters "Name=is-default,Values=true" --query "Vpcs[*].VpcId" --output text)
 echo $VPCID
 
 echo "Finding and storing the subnet IDs for defined in arguments.txt Availability Zone 1 and 2..."
-SUBNET2A=$(aws ec2 describe-subnets --output=text --query='Subnets[*].SubnetId' --filters "Name=availability-zone,Values=${10}")
-SUBNET2B=$(aws ec2 describe-subnets --output=text --query='Subnets[*].SubnetId' --filters "Name=availability-zone,Values=${11}")
+SUBNET2A=$(aws ec2 describe-subnets --output text --query='Subnets[*].SubnetId' --filters "Name=availability-zone,Values=${10}")
+SUBNET2B=$(aws ec2 describe-subnets --output text --query='Subnets[*].SubnetId' --filters "Name=availability-zone,Values=${11}")
 echo $SUBNET2A
 echo $SUBNET2B
 
@@ -109,7 +109,7 @@ echo "Targets attached to Auto Scaling Group..."
 
 # Collect Instance IDs
 # https://stackoverflow.com/questions/31744316/aws-cli-filter-or-logic
-INSTANCEIDS=$(aws ec2 describe-instances --output=text --query 'Reservations[*].Instances[*].InstanceId' --filters "Name=instance-state-name,Values=running,pending")
+INSTANCEIDS=$(aws ec2 describe-instances --output text --query 'Reservations[*].Instances[*].InstanceId' --filters "Name=instance-state-name,Values=running,pending")
 
 if [ "$INSTANCEIDS" != "" ]
   then
@@ -161,7 +161,7 @@ aws s3 ls s3://${20}
 
 # Retreive ELBv2 URL via aws elbv2 describe-load-balancers --query and print it to the screen
 #https://awscli.amazonaws.com/v2/documentation/api/latest/reference/elbv2/describe-load-balancers.html
-URL=$(aws elbv2 describe-load-balancers --load-balancer-arns $ELBARN --query 'LoadBalancers[*].DNSName' --output=text)
+URL=$(aws elbv2 describe-load-balancers --load-balancer-arns $ELBARN --query 'LoadBalancers[*].DNSName' --output text)
 echo $URL
 
 # end of outer fi - based on arguments.txt content

@@ -9,7 +9,7 @@ ltconfigfile="./config.json"
 echo "Beginning destroy script for module-05 assessment..."
 
 echo "Finding Launch template configuration file: $ltconfigfile..."
-if [ -a $ltconfigfile ]
+if [ -e $ltconfigfile ]
 then
   echo "Deleting Launch template configuration file: $ltconfigfile..."
   rm $ltconfigfile
@@ -20,7 +20,7 @@ else
 fi
 
 # Collect Instance IDs
-INSTANCEIDS=$(aws ec2 describe-instances --output=text --query 'Reservations[*].Instances[*].InstanceId' --filter "Name=instance-state-name,Values=running")
+# INSTANCEIDS=$(aws ec2 describe-instances --output text --query 'Reservations[*].Instances[*].InstanceId' --filter "Name=instance-state-name,Values=running,pending")
 
 echo 'Finding autoscaling groups...'
 ASGNAMES=$(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[*].AutoScalingGroupName" --output text)
@@ -32,13 +32,16 @@ if [ "$ASGNAMES" != "" ]
 
       aws autoscaling update-auto-scaling-group \
         --auto-scaling-group-name $ASGNAME \
-        --min-size
+        --min-size 0
 
       aws autoscaling update-auto-scaling-group \
       --auto-scaling-group-name $ASGNAME \
-      --desired-capacity
+      --desired-capacity 0
+
+    # Collect Instance IDs
+    INSTANCEIDS=$(aws ec2 describe-instances --output text --query 'Reservations[*].Instances[*].InstanceId' --filters "Name=instance-state-name,Values=running,pending")
   
-     if [ "$INSTANCEIDS" != "" ]
+    if [ "$INSTANCEIDS" != "" ]
        then
          # Trying a trick here to use the ec2 terminate-instance waiter to let the autoscaling group wind down the instances
          echo "Waiting for all instances to be terminated..."
@@ -57,7 +60,7 @@ fi
 
 echo "Finding TARGETARN..."
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/describe-target-groups.html
-TARGETARN=$(aws elbv2 describe-target-groups --query "TargetGroups[*].TargetGroupArn")
+TARGETARN=$(aws elbv2 describe-target-groups --query "TargetGroups[*].TargetGroupArn" --output text)
 if [ "$TARGETARN" != "" ]
   then
     echo "Found TargetARN: $TARGETARN..."
@@ -75,9 +78,9 @@ if [ "$INSTANCEIDS" != "" ]
     for INSTANCEID in ${INSTANCEIDSARRAY[@]};
       do
       echo "Deregistering target $INSTANCEID..."
-      aws elbv2 deregister-targets 
+      aws elbv2 deregister-targets --target-group-arn $TARGETARN --targets Id=$INSTANCEID
       echo "Waiting for target $INSTANCEID to be deregistered..."
-      aws elbv2 wait target-deregistered 
+      aws elbv2 wait target-deregistered --target-group-arn $TARGETARN --targets Id=$INSTANCEID
       done
   else
     echo 'There are no running or pending values in $INSTANCEIDS to wait for...'
@@ -85,7 +88,7 @@ fi
 
 echo "Looking up ELB ARN..."
 # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/describe-load-balancers.html
-ELBARN=
+ELBARN=$(aws elbv2 describe-load-balancers --query 'LoadBalancers[*].LoadBalancerArn' --output text)
 echo $ELBARN
 
 # Collect ListenerARN
@@ -95,7 +98,7 @@ echo $ELBARN
     for ELB in ${ELBARNSARRAY[@]};
       do
         echo "Deleting Listener..."
-        LISTENERARN=$(aws elbv2 describe-listeners --load-balancer-arn $ELB --query='Listeners[*].ListenerArn')
+        LISTENERARN=$(aws elbv2 describe-listeners --load-balancer-arn $ELB --query='Listeners[*].ListenerArn' --output text)
         aws elbv2 delete-listener --listener-arn $LISTENERARN
         echo "Listener deleted..."
       done
@@ -121,18 +124,18 @@ if [ "$ELBARN" = "" ];
 else
   echo "Issuing Command to delete Load Balancer..."
   # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/delete-load-balancer.html
-  aws elbv2 delete-load-balancer 
+  aws elbv2 delete-load-balancer --load-balancer-arn $ELBARN
   echo "Load Balancer delete command has been issued..."
 
   echo "Waiting for ELB: $ELBARN to be deleted..."
   # https://awscli.amazonaws.com/v2/documentation/api/2.0.34/reference/elbv2/wait/load-balancers-deleted.html#examples
-  aws elbv2 wait load-balancers-deleted 
+  aws elbv2 wait load-balancers-deleted --load-balancer-arns $ELBARN
   echo "ELB: $ELBARN deleted..." 
 fi
 
 echo 'Finding autoscaling groups for deletion...'
 # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/autoscaling/delete-auto-scaling-group.html
-ASGNAMES=$(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[*].AutoScalingGroupName")
+ASGNAMES=$(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[*].AutoScalingGroupName" --output text)
 if [ "$ASGNAMES" = "" ];
 then
   echo "No Autoscaling Groups found..."
@@ -142,29 +145,29 @@ else
     for ASGNAME in ${ASGNAMESARRAY[@]};
       do
       echo "Deleting $ASGNAME..."
-      aws autoscaling delete-auto-scaling-group 
+      aws autoscaling delete-auto-scaling-group --auto-scaling-group-name $ASGNAME --force-delete
       echo "Deleted $ASGNAME..."
       done
 # End of if for checking on ASGs
 fi
 
-echo 'Finding lauch-templates...'
+echo 'Finding launch-templates...'
 LAUNCHTEMPLATEIDS=$(aws ec2 describe-launch-templates --query 'LaunchTemplates[].LaunchTemplateName' --output text)
 
 if [ "$LAUNCHTEMPLATEIDS" != "" ]
   then
     echo "Found launch-tempate: $LAUNCHTEMPLATEIDS..."
     for LAUNCHTEMPLATEID in $LAUNCHTEMPLATEIDS; do
-      echo "Deleting launch-template: $LAUNCHTEMPID"
+      echo "Deleting launch-template: $LAUNCHTEMPLATEID"
       aws ec2 delete-launch-template --launch-template-name "$LAUNCHTEMPLATEID"
     done
 else
-   echo "No launch-templates found. Perhpas you forget to run the create-env.sh script?"
+   echo "No launch-templates found. Perhaps you forgot to run the create-env.sh script?"
 # end of if for launchtemplateids
 fi 
 
 # Query for bucket names, delete objects then buckets
-MYS3BUCKETS=$(aws s3api list-buckets )
+MYS3BUCKETS=$(aws s3api list-buckets --query "Buckets[].Name" --output text)
 MYS3BUCKETS_ARRAY=($MYS3BUCKETS)
 
 #check for if list of buckets is non-zero (populated)
@@ -173,7 +176,7 @@ if [ -n "$MYS3BUCKETS" ]
     echo "Looping through array of buckets to create array of objects..."
     for j in "${MYS3BUCKETS_ARRAY[@]}"
     do
-    MYKEYS=$(aws s3api list-objects-v2 )
+    MYKEYS=$(aws s3api list-objects-v2 --bucket $j --query "Contents[*].Key" --output text)
     MYKEYS_ARRAY=($MYKEYS)
     echo "End of looping through array of buckets..."
 
@@ -181,8 +184,8 @@ if [ -n "$MYS3BUCKETS" ]
       for k in "${MYKEYS_ARRAY[@]}"
       do
       echo "Deleting object $k in bucket $j..."
-      aws s3api delete-object 
-      aws s3api wait object-not-exists 
+      aws s3api delete-object --bucket $j --key $k
+      aws s3api wait object-not-exists --bucket $j --key $k
       echo "Deleted object $k in bucket $j..."
       done
     done
@@ -190,8 +193,8 @@ if [ -n "$MYS3BUCKETS" ]
     for l in "${MYS3BUCKETS_ARRAY[@]}"
     do
     echo "Deleting bucket $l..."
-    aws s3api delete-bucket 
-    aws s3api wait bucket-not-exists 
+    aws s3api delete-bucket --bucket $l
+    aws s3api wait bucket-not-exists --bucket $l
     echo "Deleted bucket $l..."
     done
   else  
