@@ -5,8 +5,8 @@
 # Launch Template and Autoscaling group commands for creating EC2 instances
 # You will need an additional script to generate a JSON file with parameters
 # for your launch template. You will need to add an extras storage harddisk (EBS)
-# to each EC2 instance, define and IAM profile to use and define the name of two
-# S3 buckets to create
+# to each EC2 instance, define IAM profile to use and define the name of two
+# S3 buckets to create.
 # 
 # You will need to define these variables in a txt file named: arguments.txt
 # 1 image-id
@@ -99,7 +99,8 @@ aws autoscaling create-auto-scaling-group \
   --target-group-arns $TARGETARN \
   --min-size ${14} \
   --max-size ${15} \
-  --desired-capacity ${16}
+  --desired-capacity ${16} \
+  --health-check-grace-period 30
 
 echo 'Waiting for Auto Scaling Group to spin up EC2 instances and attach them to the TargetARN...'
 # Create waiter for registering targets
