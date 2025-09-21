@@ -2,6 +2,7 @@
 Assignment Repository for Coursera's Cloud Computing by Illinois Tech.
 
 ## Architecture
+1. For **Autoscaling** of **EC2 Instances** using *Auto Scaling Group*, *Application ELB*, and *Target Group:*
 ![aws assignment architecture](architecture.png)
 
 ## Requirements
