@@ -100,7 +100,8 @@ aws autoscaling create-auto-scaling-group \
   --min-size ${14} \
   --max-size ${15} \
   --desired-capacity ${16} \
-  --health-check-grace-period 30
+  --health-check-grace-period 30 \
+  --tags Key=module,Value=${7},PropagateAtLaunch=true
 
 echo 'Waiting for Auto Scaling Group to spin up EC2 instances and attach them to the TargetARN...'
 # Create waiter for registering targets
