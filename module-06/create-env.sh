@@ -89,7 +89,7 @@ else
     # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/rds/describe-db-instances.html
     echo "******************************************************************************"
     echo "Retrieving the RDS Endpoint Address and printing to the screen..."
-    RDS_Address=$(aws rds describe-db-instances --db-instance-identifier ${22}--query "DBInstances[*].Endpoint.Address" --output text)
+    RDS_Address=$(aws rds describe-db-instances --db-instance-identifier ${22} --query "DBInstances[*].Endpoint.Address" --output text)
     echo $RDS_Address
     echo "Retrieving the RDS Read Replica Endpoint Address and printing to the screen..."
     RDS_RR_Address=$(aws rds describe-db-instances --db-instance-identifier "${22}-read-replica" --query "DBInstances[*].Endpoint.Address" --output text)
