@@ -14,4 +14,3 @@ PASSVALUE=$(aws secretsmanager get-secret-value --secret-id $SECRET_ID --output=
 
 echo $USERVALUE
 echo $PASSVALUE
-dos2unix create-secrets.sh
