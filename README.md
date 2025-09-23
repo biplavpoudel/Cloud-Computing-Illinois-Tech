@@ -18,3 +18,32 @@ python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r ./requirements.txt
 ```
+To pass the positional arguments to the bash scripts, create a arguments.txt in root dir.
+```bash
+sudo vim arguments.txt
+```
+Then add (replace) the respective values:
+```vim
+image-id
+instance-type
+key-name
+security-group-ids
+count - of 3
+user-data -- use install-env.sh
+Tag
+Target Group
+elb-name
+Availability Zone 1
+Availability Zone 2
+Launch Template Name
+ASG name
+ASG min=2
+ASG max=5
+ASG desired=3
+AWS Region for LaunchTemplate (use your default region)
+EBS hard drive size in GB (15)
+S3 bucket name one
+S3 bucket name two
+Secret Name
+Database Name
+```
