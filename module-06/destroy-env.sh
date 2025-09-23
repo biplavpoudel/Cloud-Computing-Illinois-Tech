@@ -6,7 +6,7 @@
 # Collect all database instance names into an array
 echo "********************************************************************"
 echo "Collecting RDs instance IDs into an array..."
-MYDBINSTANCE=$(aws rds describe-db-instances --query "" )
+MYDBINSTANCE=$(aws rds describe-db-instances --query "DBInstances[*].DBInstanceIdentifier" )
 
 if [ "$MYDBINSTANCE" == "" ]
 then
