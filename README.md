@@ -18,12 +18,9 @@ python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r ./requirements.txt
 ```
-To pass the positional arguments to the bash scripts, create a arguments.txt in root dir.
+To pass the positional arguments to the bash scripts, create a arguments.txt in root dir:
 ```bash
-sudo vim arguments.txt
-```
-Then add (replace) the respective values:
-```vim
+cat << EOF > arguments.txt
 image-id
 instance-type
 key-name
@@ -46,6 +43,7 @@ S3 bucket name one
 S3 bucket name two
 Secret Name
 Database Name
+EOF
 ```
 
 To use **Terraform** as *Infrastructure as Code*, we install the package into the Vagrant VM. The instructions can be found [here](https://developer.hashicorp.com/terraform).
