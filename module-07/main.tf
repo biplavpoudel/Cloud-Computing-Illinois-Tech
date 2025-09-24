@@ -185,6 +185,10 @@ resource "aws_launch_template" "mp1-lt" {
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group
 ##############################################################################
 
+ # DON'T USE "target_group_arns"  attribute if you want to create "aws_autoscaling_attachment" resource.
+ # This gives race condition beacuse we are trying same thing twice!
+ # Use only one way. Not both!
+
 resource "aws_autoscaling_group" "bar" {
   name                      = var.asg-name
   depends_on                = [aws_launch_template.mp1-lt]
@@ -193,7 +197,6 @@ resource "aws_autoscaling_group" "bar" {
   min_size                  = var.min
   health_check_grace_period = 300
   health_check_type         = "ELB"
-  target_group_arns         = [aws_lb_target_group.alb-lb-tg.arn]
   vpc_zone_identifier       = [data.aws_subnets.subneta.ids[0], data.aws_subnets.subnetb.ids[0]]
 
   tag {
@@ -216,7 +219,7 @@ resource "aws_autoscaling_group" "bar" {
 resource "aws_autoscaling_attachment" "example" {
   # Wait for lb to be running before attaching to asg
   depends_on  = [aws_lb.lb]
-  autoscaling_group_name = var.asg-name
+  autoscaling_group_name = aws_autoscaling_group.bar.name
   lb_target_group_arn    = aws_lb_target_group.alb-lb-tg.arn
 }
 
