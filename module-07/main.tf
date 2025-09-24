@@ -216,6 +216,9 @@ resource "aws_autoscaling_group" "bar" {
 ##############################################################################
 # Create a new ALB Target Group attachment
 
+# DON'T USE THIS RESOURCE if you have already defined "target_group_arns" in "aws_autoscaling_group" resource above!!
+# Doing so will cause a conflict of attachments!
+
 resource "aws_autoscaling_attachment" "example" {
   # Wait for lb to be running before attaching to asg
   depends_on  = [aws_lb.lb]
