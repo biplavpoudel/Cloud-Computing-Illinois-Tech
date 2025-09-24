@@ -47,3 +47,22 @@ S3 bucket name two
 Secret Name
 Database Name
 ```
+
+To use **Terraform** as *Infrastructure as Code*, we install the package into the Vagrant VM. The instructions can be found [here](https://developer.hashicorp.com/terraform>.
+
+We need a *.tfvars* file to pass the AWS configuration variables to *varaibles.tf*. To create that, we use:
+```bash
+cat << EOF > terraform.tfvars
+imageid                = ""
+instance-type          = ""
+key-name               = ""
+vpc_security_group_ids = ""
+cnt                    =
+install-env-file       = ""
+elb-name               = ""
+tg-name                = ""
+asg-name               = ""
+lt-name                = ""
+module-tag             = ""
+EOF
+```
