@@ -101,3 +101,81 @@ resource "aws_lb" "lb" {
 output "url" {
   value = aws_lb.lb.dns_name
 }
+
+##############################################################################
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group
+##############################################################################
+
+resource "aws_lb_target_group" "alb-lb-tg" {
+  # depends_on is effectively a waiter -- it forces this resource to wait until the listed
+  # resource is ready
+  depends_on  = [aws_lb.lb]
+  name        = var.tg-name
+  target_type = "instance"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = data.aws_vpc.main.id
+}
+
+##############################################################################
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener
+##############################################################################
+
+resource "aws_lb_listener" "front_end" {
+  load_balancer_arn = aws_lb.lb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.alb-lb-tg.arn
+  }
+}
+
+##############################################################################
+# Create launch template
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/launch_template
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template
+##############################################################################
+resource "aws_launch_template" "mp1-lt" {
+  image_id                             = var.imageid
+  instance_initiated_shutdown_behavior = "terminate"
+  instance_type                        = var.instance-type
+  key_name                             = var.key-name
+
+  monitoring {
+    enabled = false
+  }
+  placement {
+    availability_zone = data.aws_availability_zones.primary.id
+  }
+  
+  block_device_mappings {
+    device_name = "dev/sdf"
+
+    ebs {
+      volume_size = 15
+    }
+  }
+
+  block_device_mappings {
+    device_name = "dev/sdg"
+
+    ebs {
+      volume_size = 15
+    }
+  }
+
+  network_interfaces {
+  subnet_id = data.aws_subnets.subneta.ids[0]
+  security_groups = [var.vpc_security_group_ids]
+  }
+  
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = var.module-tag
+    }
+  }
+  user_data = filebase64(var.install-env-file)
+}
