@@ -72,3 +72,15 @@ lt-name                = ""
 module-tag             = ""
 EOF
 ```
+
+To initialize, validate and create the **Terraform** plan, we perform following bash actions:
+```bash
+terraform init # initializes a working dir with Terraform config
+terraform validate # validates the config file
+terraform apply # executes the actions in the Terraform plan
+```
+
+To destroy all the created resources, simply apply:
+```bash
+terraform destroy # deprovisions all objects managed by the Terraform config 
+```
