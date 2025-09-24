@@ -53,6 +53,7 @@ Secret Name
 Database Name
 EOF
 ```
+## Terraform *(for Module 7)*
 
 To use **Terraform** as *Infrastructure as Code*, we install the package into the Vagrant VM. The instructions can be found [here](https://developer.hashicorp.com/terraform).
 
