@@ -74,3 +74,7 @@ data "aws_subnets" "subnetc" {
 output "subnetid-2a" {
   value = [data.aws_subnets.subneta.ids]
 }
+
+output "subnetid-2b" {
+  value = [data.aws_subnets.subnetb.ids]
+}
