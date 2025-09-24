@@ -50,7 +50,7 @@ Database Name
 
 To use **Terraform** as *Infrastructure as Code*, we install the package into the Vagrant VM. The instructions can be found [here](https://developer.hashicorp.com/terraform).
 
-We need a *.tfvars* file to pass the AWS configuration variables to *varaibles.tf*. To create that, we use:
+We need a *.tfvars* file to pass the AWS configuration variables to *variables.tf*. To create that, we use:
 ```bash
 cat << EOF > terraform.tfvars
 imageid                = ""
