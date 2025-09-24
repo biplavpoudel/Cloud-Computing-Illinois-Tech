@@ -78,3 +78,26 @@ output "subnetid-2a" {
 output "subnetid-2b" {
   value = [data.aws_subnets.subnetb.ids]
 }
+
+##############################################################################
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb
+##############################################################################
+resource "aws_lb" "lb" {
+  name               = var.elb-name
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = var.vpc_security_group_ids
+
+  subnets = [data.aws_subnets.subneta.ids[0], data.aws_subnets.subnetb.ids[0]]
+  
+  enable_deletion_protection = false
+
+  tags = {
+    Environment = var.module-tag
+  }
+}
+
+# output will print a value out to the screen
+output "url" {
+  value = aws_lb.lb.dns_name
+}

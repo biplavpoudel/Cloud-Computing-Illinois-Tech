@@ -5,6 +5,14 @@ Assignment Repository for Coursera's Cloud Computing by Illinois Tech.
 1. For **Autoscaling** of **EC2 Instances** using *Auto Scaling Group*, *Application ELB*, and *Target Group:*
 ![aws assignment architecture](architecture.png)
 
+## Modules (Cloud Native)
+2. Tooling
+3. Target Groups
+4. Autoscaling Groups
+5. Storage
+6. Database
+7. Orchestration
+
 ## Requirements
 We need to install some packages into Vagrant box:
 ```bash
