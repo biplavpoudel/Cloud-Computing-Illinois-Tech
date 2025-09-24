@@ -151,7 +151,7 @@ resource "aws_launch_template" "mp1-lt" {
   }
   
   block_device_mappings {
-    device_name = "dev/sdf"
+    device_name = "/dev/sdf"
 
     ebs {
       volume_size = 15
@@ -159,7 +159,7 @@ resource "aws_launch_template" "mp1-lt" {
   }
 
   block_device_mappings {
-    device_name = "dev/sdg"
+    device_name = "/dev/sdg"
 
     ebs {
       volume_size = 15
