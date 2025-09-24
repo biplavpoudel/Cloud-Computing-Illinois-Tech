@@ -35,14 +35,14 @@ data "aws_availability_zones" "available" {
 data "aws_availability_zones" "primary" {
   filter {
     name   = "zone-name"
-    values = ["us-east-2a"]
+    values = ["ap-south-1a"]
   }
 }
 
 data "aws_availability_zones" "secondary" {
   filter {
     name   = "zone-name"
-    values = ["us-east-2b"]
+    values = ["ap-south-1b"]
   }
 }
 
@@ -53,21 +53,21 @@ data "aws_availability_zones" "secondary" {
 data "aws_subnets" "subneta" {
   filter {
     name   = "availabilityZone"
-    values = ["us-east-2a"]
+    values = ["ap-south-1a"]
   }
 }
 
 data "aws_subnets" "subnetb" {
   filter {
     name   = "availabilityZone"
-    values = ["us-east-2b"]
+    values = ["ap-south-1b"]
   }
 }
 
 data "aws_subnets" "subnetc" {
   filter {
     name   = "availabilityZone"
-    values = ["us-east-2c"]
+    values = ["ap-south-1c"]
   }
 }
 
